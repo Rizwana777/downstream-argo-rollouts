@@ -6,7 +6,7 @@ spec:
   params:
     - name: IMAGE_URL
       description: 'The Argo Rollouts image to test'
-      default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:7fb171142446724b98a044fed26a9f75c38de844'
+      default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:d1e959470ae2750d3174dcec12ce56866d4e042e'
     - name: EXPECTED_BINARIES
       description: 'List of binaries expected in the image'
       default: 'kubectl-argo-rollouts-linux-amd64,kubectl-argo-rollouts-linux-arm64,kubectl-argo-rollouts-darwin-amd64,kubectl-argo-rollouts-darwin-arm64'
@@ -15,7 +15,7 @@ spec:
       taskSpec:
         params:
           - name: IMAGE_URL
-            default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:7fb171142446724b98a044fed26a9f75c38de844'
+            default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:d1e959470ae2750d3174dcec12ce56866d4e042e'
           - name: EXPECTED_BINARIES
             default: 'kubectl-argo-rollouts-linux-amd64,kubectl-argo-rollouts-linux-arm64,kubectl-argo-rollouts-darwin-amd64,kubectl-argo-rollouts-darwin-arm64'
         volumes:
