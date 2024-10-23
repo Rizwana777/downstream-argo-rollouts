@@ -101,6 +101,10 @@ spec:
                     echo "$binary is expected to be a 64-bit Darwin binary (ARM64)"
                     echo "$binary_arch" | grep 'Mach-O.*arm64' &> /dev/null || { echo "ERROR: Architecture mismatch for $binary"; exit 1; }
                     ;;
+                  *windows-amd64*)
+                    echo "$binary is expected to be a 64-bit Windows binary (x86_64)"
+                    echo "$binary_arch" | grep 'PE32+ executable.*x86-64' &> /dev/null || { echo "ERROR: Architecture mismatch for $binary"; exit 1; }
+                    ;;
                   *)
                     echo "Unknown binary: $binary"
                     exit 1
