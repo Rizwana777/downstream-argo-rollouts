@@ -4,9 +4,8 @@ metadata:
   name: argo-rollouts-integration-test
 spec:
   params:
-    - name: IMAGE_URL
-      description: 'The Argo Rollouts image to test'
-      default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:d1e959470ae2750d3174dcec12ce56866d4e042e'
+    - name: SNAPSHOT
+      description: 'Snapshot of the application'
     - name: EXPECTED_BINARIES
       description: 'List of binaries expected in the image'
       default: 'kubectl-argo-rollouts-linux-amd64,kubectl-argo-rollouts-linux-arm64,kubectl-argo-rollouts-darwin-amd64,kubectl-argo-rollouts-darwin-arm64'
@@ -14,8 +13,6 @@ spec:
     - name: pull-and-verify-binaries
       taskSpec:
         params:
-          - name: IMAGE_URL
-            default: 'quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/test-application/downstream-argo-rollouts:d1e959470ae2750d3174dcec12ce56866d4e042e'
           - name: EXPECTED_BINARIES
             default: 'kubectl-argo-rollouts-linux-amd64,kubectl-argo-rollouts-linux-arm64,kubectl-argo-rollouts-darwin-amd64,kubectl-argo-rollouts-darwin-arm64'
         volumes:
@@ -42,14 +39,24 @@ spec:
           # Step 2: Pull the image, extract the binaries using ORAS and verify the expected binaries exist
           - name: pull-extract-and-verify-binaries
             image: registry.access.redhat.com/ubi8/ubi
-            script: |         
-              echo "Pulling the image $(params.IMAGE_URL) with ORAS and extracting binaries..."
+            script: |
+              # Install jq to extract values from SNAPSHOT
+              dnf -y install jq
+
+              # Extract container image url from snapshot for testing
+              IMAGE_URL=$(echo '$(params.SNAPSHOT)' | jq -r '.components[0].containerImage')
+              echo "IMAGE_URL: $IMAGE_URL"
+
+              echo "Pulling the image $IMAGE_URL with ORAS and extracting binaries..."          
+              # Install the 'file' utility for binary type detection
+              echo "Installing 'file' utility..."
+              yum install -y file
 
               # Create a directory for OCI layout
               mkdir -p ./oci-layout
 
               # Pull all image layers using ORAS and store in the OCI layout directory
-              /workspace/oras-install/oras copy $(params.IMAGE_URL) --to-oci-layout ./oci-layout
+              /workspace/oras-install/oras copy $IMAGE_URL --to-oci-layout ./oci-layout
 
               # List the pulled files
               echo "Listing files in OCI layout:"
@@ -77,7 +84,7 @@ spec:
                   echo "$binary exists."
                 fi
               done
-
+              
               echo "Verify binary architecture using the file command"
               for binary in "${binaries[@]}"; do
                 binary_arch=$(file ./platform-binaries/$binary)
@@ -112,7 +119,7 @@ spec:
                 esac
               done
 
-              echo "All expected binaries verified successfully with correct architectures!"
+              echo "All expected binaries verified successfully with correct architectures!"              
             volumeMounts:
               - name: oras-volume
                 mountPath: /workspace/oras-install
