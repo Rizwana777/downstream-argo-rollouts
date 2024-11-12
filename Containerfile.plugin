@@ -46,7 +46,8 @@ COPY --from=argo-rollouts-ui /src/dist/app ./ui/dist/app
 COPY . .
 
 # Create required UI build markers to avoid rebuilds without Yarn installed
-RUN touch ui/dist/node_modules.marker && \
+RUN cd argo-rollouts && \
+    touch ui/dist/node_modules.marker && \
     mkdir -p ui/dist/app && \
     touch ui/dist/app/index.html && \
     find ui/dist
@@ -54,9 +55,9 @@ RUN touch ui/dist/node_modules.marker && \
 # Build the plugins for multiple platforms
 RUN cd argo-rollouts && make go-mod-vendor && make plugin-linux plugin-darwin plugin-windows
 
-####################################################################################################
+###################################################################################################
 # Package the binaries into the image using UBI (Universal Base Image)
-####################################################################################################
+###################################################################################################
 FROM registry.access.redhat.com/ubi8/ubi
 
 # This directory is checked by ecosystem-cert-preflight-checks task in Konflux
