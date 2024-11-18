@@ -40,21 +40,20 @@ COPY argo-rollouts/go.mod argo-rollouts/go.sum ./
 RUN go mod download
 
 # Copy UI files for plugin build
-COPY --from=argo-rollouts-ui /src/dist/app ./ui/dist/app
+COPY --from=argo-rollouts-ui /src/dist/app argo-rollouts/ui/dist/app
 
 # Copy the project files, including the .git directory
 COPY . .
 
 # Create required UI build markers to avoid rebuilds without Yarn installed
 RUN cd argo-rollouts && \
-    mkdir -p ui/dist && \ 
     touch ui/dist/node_modules.marker && \
     mkdir -p ui/dist/app && \
     touch ui/dist/app/index.html && \
     find ui/dist
 
 # Build the plugins for multiple platforms
-RUN cd argo-rollouts && make go-mod-vendor && make plugin-linux plugin-darwin plugin-windows
+RUN cd argo-rollouts && && go mod vendor && make plugin-linux plugin-darwin plugin-windows
 
 ###################################################################################################
 # Package the binaries into the image using UBI (Universal Base Image)
